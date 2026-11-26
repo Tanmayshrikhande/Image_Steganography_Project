@@ -1,0 +1,951 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Steganography</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #D4A5FF, #A5D4FF);
+            color: #333333;
+            text-align: center;
+            margin: 0;
+            padding: 10px;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 600px;
+            min-width: 500px;
+            padding: 20px;
+            background: linear-gradient(135deg, #FFDAB9, #FFFACD);
+            border-radius: 12px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+            margin-top: 80px;
+        }
+        #main-heading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background-color: #004D60;
+            color: #FFFFFF;
+            text-align: center;
+            padding: 12px 0;
+            font-size: 1.8em;
+            font-weight: bold;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            margin: 0;
+        }
+        #welcome-screen {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            background: none;
+            padding: 0;
+            border-radius: none;
+            box-shadow: none;
+        }
+        #welcome-screen h2 {
+            font-size: 2em;
+            font-weight: bold;
+            color: white;
+            margin-bottom: 20px;
+        }
+        #get-started-btn {
+            padding: 12px 24px;
+            background-color: #2E3A87;
+            color: #FFFFFF;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.3s;
+            font-weight: bold;
+            font-size: 1em;
+        }
+        #get-started-btn:hover {
+            background-color: #FFD700;
+            color: #2E3A87;
+        }
+        #how-it-works {
+            font-size: 1.5em;
+            color: white;
+            cursor: pointer;
+            transition: color 0.3s;
+            margin-top: 50px;
+        }
+        #how-it-works:hover {
+            color: #FFD700;
+        }
+        #steganography-definition {
+            font-size: 1.2em;
+            color: white;
+            margin-top: 15px;
+            line-height: 1.5;
+            max-height: 0; 
+            overflow: hidden; 
+            opacity: 0;
+            transition: max-height 0.3s ease-out, opacity 0.3s ease-out;
+        }
+
+        .button {
+            padding: 12px 24px;
+            background-color: #2E3A87;
+            color: #FFFFFF;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 10px;
+            transition: 0.3s;
+            font-weight: bold;
+            font-size: 1em;
+        }
+
+        .button:hover {
+            background-color: #FFD700;
+            color: #2E3A87;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        textarea, input {
+            width: 90%;
+            margin-top: 10px;
+            padding: 12px;
+            background-color: #FFF4E0;
+            border: 2px solid #2E3A87;
+            color: #333333;
+            border-radius: 8px;
+            font-size: 1em;
+        }
+
+        canvas {
+            margin-top: 10px;
+            border: 2px solid #2E3A87;
+            width: 300px;
+            height: 200px;
+            object-fit: contain;
+        }
+
+        .progress-container {
+            width: 90%;
+            background-color: #ccc;
+            border-radius: 8px;
+            margin: 10px auto;
+            display: none;
+        }
+
+        .progress-bar {
+            height: 8px;
+            width: 0;
+            background-color: #2E3A87;
+            border-radius: 8px;
+            transition: width 0.5s ease-in-out;
+        }
+
+        input::placeholder, textarea::placeholder {
+            color: #666666;
+        }
+
+        .file-upload-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        margin-bottom: 10px; 
+        }
+
+
+       .file-upload-container input[type="file"] {
+       display: none;
+       }
+
+
+    .file-upload-label {
+    display: inline-block;
+    background-color: #2E3A87;
+    color: #FFFFFF;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 24px;
+    font-size: 1em;
+    font-weight: bold;
+    cursor: pointer;
+    text-align: center;
+    transition: 0.3s ease;
+    }
+
+    .file-upload-label:hover {
+    background-color: #FFD700;
+    color: #2E3A87;
+    }
+
+    #button-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin-top: 50px; 
+    }
+
+    #encode-btn, #decode-btn {
+    width: 200px; 
+    margin: 10px 0; 
+    }
+
+    .file-upload-container {
+    border: 2px dashed #2E3A87;
+    padding: 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: 0.3s ease;
+    width: auto;
+    }
+
+    .file-upload-container.drag-over {
+    background-color: #FFD700;
+    border-color: #2E3A87;
+    color: #2E3A87;
+    }
+
+    .modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    z-index: 1000;
+    display: flex;
+    align-items: center;  
+    justify-content: center;  
+    overflow: auto;  
+    padding: 20px;  
+    }
+
+    .modal-content {
+    background: #fff;
+    padding: 30px;
+    width: 90%;
+    max-width: 600px;   
+    max-height: 80vh;    
+    border-radius: 12px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    animation: fadeIn 0.5s;
+    text-align: left;
+    line-height: 1.6;
+    overflow-y: auto;    
+    }
+
+    .close-btn {
+    font-size: 24px;
+    font-weight: bold;
+    color: #444;
+    cursor: pointer;
+    position: absolute;
+    top: 10px;
+    right: 20px;
+    }
+
+    .close-btn:hover {
+    color: #ff0000;
+    }
+
+
+    .step {
+    margin-bottom: 20px;
+    padding: 15px;
+    border-left: 5px solid #2E3A87;
+    background: #f4f4f4;
+    transition: 0.3s;
+    }
+
+    .step:hover {
+    background: #e0e0e0;
+    }
+
+
+    .button {
+    display: block;
+    margin: 20px auto;
+    background: #2E3A87;
+    color: #fff;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1em;
+    transition: 0.3s;
+    }
+
+    .button:hover {
+    background: #FFD700;
+    color: #2E3A87;
+    }
+
+
+    .hidden {
+    display: none;
+    }
+
+
+    @keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+    }
+
+    #select-mode-heading {
+    margin-bottom: 20px;
+    font-size: 1.5em;
+    color: #2E3A87;
+    font-weight: bold;
+    }
+
+
+
+@media (max-width: 600px) {
+    body {
+        flex-direction: column;
+        padding: 5px;
+    }
+
+    .container {
+        width: 100%;
+        min-width: unset;
+        max-width: 95%;
+        margin-top: 100px;
+        padding: 15px;
+    }
+
+    #main-heading {
+        font-size: 1.2em;
+        padding: 10px 0;
+    }
+
+    canvas {
+        width: 100% !important;
+        height: auto !important;
+    }
+
+    textarea, input {
+        width: 100%;
+        font-size: 1em;
+    }
+
+    .file-upload-label,
+    #encode-btn, #decode-btn,
+    .button {
+        width: 100%;
+        font-size: 1em;
+    }
+
+    .modal-content {
+        padding: 15px;
+        font-size: 0.95em;
+    }
+
+    #select-mode-heading {
+        font-size: 1.2em;
+    }
+}
+    </style>
+</head>
+<body>
+    
+    <h1 id="main-heading">IMAGE STEGANOGRAPHY</h1>
+    <div id="welcome-screen">
+        <h2>Welcome to Image Steganography</h2>
+        <button id="get-started-btn" class="button">Get Started</button>
+        <h3 id="how-it-works">How It Works</h3>
+        <p id="steganography-definition">
+            Image steganography is the process of hiding secret messages inside an image without significantly altering its appearance. This ensures secure communication while keeping the hidden data undetectable.
+        </p>
+    </div>
+    <div class="container hidden" id="main-content">
+        <button id="back-btn" class="button hidden">&#8592</button>
+        <h2 id="select-mode-heading">Select Encode or Decode</h2>
+    <div id="button-container">  
+    <button id="encode-btn" class="button">Encode</button>
+    <button id="decode-btn" class="button">Decode</button>
+    </div>
+<div id="encode-modal" class="hidden modal-overlay">
+    <div class="modal-content">
+        <span id="close-encode-modal" class="close-btn">&times;</span>
+        <h2>How to Encode a Message</h2>
+
+        <div class="step">
+            <h3>Step 1: Select an Image</h3>
+            <p>Click the <strong>"Select Image"</strong> button or drag and drop an image into the designated area.</p>
+        </div>
+
+        <div class="step">
+            <h3>Step 2: Enter Your Secret Message</h3>
+            <p>Type the message you want to hide in the provided text area.</p>
+        </div>
+
+        <div class="step">
+            <h3>Step 3: Add an Encryption Key</h3>
+            <p>Enter a secure encryption key for extra protection.</p>
+        </div>
+
+        <div class="step">
+            <h3>Step 4: Click "Encode"</h3>
+            <p>Click the <strong>"Encode"</strong> button to hide the message. You can download the modified image.</p>
+        </div>
+        <button id="encode-next-btn" class="button" style="display: block; margin: 20px auto; background: #2E3A87; color: #fff; padding: 12px 24px; border: none; border-radius: 8px; cursor: pointer; font-size: 1em;">Next</button>
+    </div>
+</div>
+
+
+<div id="decode-modal" class="hidden modal-overlay">
+    <div class="modal-content">
+        <span id="close-decode-modal" class="close-btn">&times;</span>
+        <h2>How to Decode a Message</h2>
+        <div class="step">
+            <h3>Step 1: Upload the Encoded Image</h3>
+            <p>Click the <strong>"Select Image"</strong> button or drag and drop the encoded image.</p>
+        </div>
+        <div class="step">
+            <h3>Step 2: Enter the Decryption Key</h3>
+            <p>Enter the same encryption key used during encoding.</p>
+        </div>
+        <div class="step">
+            <h3>Step 3: Click "Decode"</h3>
+            <p>Click the <strong>"Decode"</strong> button to extract the hidden message.</p>
+        </div>
+        <div class="step">
+            <h3>Step 4: View the Hidden Message</h3>
+            <p>After decryption, the hidden message will be displayed in the text area.</p>
+        </div>       
+        <button id="decode-next-btn" class="button" style="display: block; margin: 20px auto; background: #2E3A87; color: #fff; padding: 12px 24px; border: none; border-radius: 8px; cursor: pointer; font-size: 1em;">Next</button>
+    </div>
+</div>
+
+        <div id="encode-section" class="hidden">
+            <h2>Select an image to hide the text</h2>      
+            <div class="file-upload-container" id="encode-drop-zone">                
+                <label for="encode-image-input" class="file-upload-label">Select Image</label>
+                <input type="file" id="encode-image-input" accept="image/*">
+                <canvas id="encode-preview"></canvas>
+            </div>       
+            <textarea id="encode-text" placeholder="Enter the message here..."></textarea>
+            <input type="password" id="encode-key" placeholder="Enter encryption key">       
+            <div class="progress-container" id="encode-progress">
+                <div class="progress-bar" id="encode-progress-bar"></div>
+            </div>
+            <button id="encode-image-btn" class="button">Encode</button>
+        </div>
+        <div id="decode-section" class="hidden">
+            <h2>Select an image to decode the hidden text</h2>
+            <div class="file-upload-container" id="decode-drop-zone">              
+                <label for="decode-image-input" class="file-upload-label">Select Image</label>
+                <input type="file" id="decode-image-input" accept="image/*">
+                <canvas id="decode-preview"></canvas>
+            </div>
+            <input type="password" id="decode-key" placeholder="Enter decryption key">
+            <button id="decode-image-btn" class="button">Decode</button>
+            <div class="progress-container" id="decode-progress">
+                <div class="progress-bar" id="decode-progress-bar"></div>
+            </div>
+            <textarea id="decoded-text" readonly></textarea>
+        </div>  
+    </div>
+    <script>
+        const elements = {
+            welcomeScreen: document.getElementById('welcome-screen'),
+            mainContent: document.getElementById('main-content'),
+            getStartedBtn: document.getElementById('get-started-btn'),
+            howItWorksBtn: document.getElementById('how-it-works'),
+            definition: document.getElementById('steganography-definition'),
+            backBtn: document.getElementById('back-btn'),
+            selectModeHeading: document.getElementById('select-mode-heading'),
+            encodeBtn: document.getElementById('encode-btn'),
+            decodeBtn: document.getElementById('decode-btn'),
+            encodeModal: document.getElementById('encode-modal'),
+            decodeModal: document.getElementById('decode-modal'),
+            closeEncodeModalBtn: document.getElementById('close-encode-modal'),
+            closeDecodeModalBtn: document.getElementById('close-decode-modal'),
+            encodeNextBtn: document.getElementById('encode-next-btn'),
+            decodeNextBtn: document.getElementById('decode-next-btn'),
+            encodeSection: document.getElementById('encode-section'),
+            decodeSection: document.getElementById('decode-section'),
+            encodeDropZone: document.getElementById('encode-drop-zone'),
+            decodeDropZone: document.getElementById('decode-drop-zone'),
+            encodeImageInput: document.getElementById('encode-image-input'),
+            decodeImageInput: document.getElementById('decode-image-input'),
+            encodeText: document.getElementById('encode-text'),
+            decodeText: document.getElementById('decoded-text'),
+            encodeKey: document.getElementById('encode-key'),
+            decodeKey: document.getElementById('decode-key'),
+            encodeImageBtn: document.getElementById('encode-image-btn'),
+            decodeImageBtn: document.getElementById('decode-image-btn'),
+            encodeProgress: document.getElementById('encode-progress'),
+            decodeProgress: document.getElementById('decode-progress'),
+            encodeProgressBar: document.getElementById('encode-progress-bar'),
+            decodeProgressBar: document.getElementById('decode-progress-bar')
+        };
+
+        const selectedFiles = {
+            encode: null,
+            decode: null
+        };
+
+        const TERMINATOR = '00000000';
+        const textEncoder = new TextEncoder();
+        const textDecoder = new TextDecoder();
+        const cryptoSupported = Boolean(window.crypto && window.crypto.subtle);
+
+        function toggleDefinition() {
+            const isExpanded = elements.definition.style.maxHeight && elements.definition.style.maxHeight !== '0px';
+            if (isExpanded) {
+                elements.definition.style.maxHeight = '0px';
+                elements.definition.style.opacity = '0';
+                return;
+            }
+
+            elements.definition.style.maxHeight = elements.definition.scrollHeight + 'px';
+            elements.definition.style.opacity = '1';
+        }
+
+        function openModal(modal) {
+            modal.classList.remove('hidden');
+        }
+
+        function closeModal(modal) {
+            modal.classList.add('hidden');
+        }
+
+        function showModeSelection() {
+            closeModal(elements.encodeModal);
+            closeModal(elements.decodeModal);
+            elements.selectModeHeading.style.display = 'block';
+            elements.encodeSection.classList.add('hidden');
+            elements.decodeSection.classList.add('hidden');
+            elements.encodeBtn.classList.remove('hidden');
+            elements.decodeBtn.classList.remove('hidden');
+            elements.backBtn.classList.add('hidden');
+        }
+
+        function enterMode(mode) {
+            const isEncodeMode = mode === 'encode';
+            closeModal(elements.encodeModal);
+            closeModal(elements.decodeModal);
+            elements.selectModeHeading.style.display = 'none';
+            elements.encodeSection.classList.toggle('hidden', !isEncodeMode);
+            elements.decodeSection.classList.toggle('hidden', isEncodeMode);
+            elements.encodeBtn.classList.add('hidden');
+            elements.decodeBtn.classList.add('hidden');
+            elements.backBtn.classList.remove('hidden');
+        }
+
+        function setProgress(mode, value) {
+            const container = mode === 'encode' ? elements.encodeProgress : elements.decodeProgress;
+            const bar = mode === 'encode' ? elements.encodeProgressBar : elements.decodeProgressBar;
+
+            container.style.display = 'block';
+            bar.style.width = Math.max(0, Math.min(100, value)) + '%';
+
+            if (value >= 100) {
+                setTimeout(() => {
+                    container.style.display = 'none';
+                    bar.style.width = '0%';
+                }, 600);
+            }
+        }
+
+        function resetProgress(mode) {
+            const container = mode === 'encode' ? elements.encodeProgress : elements.decodeProgress;
+            const bar = mode === 'encode' ? elements.encodeProgressBar : elements.decodeProgressBar;
+
+            container.style.display = 'none';
+            bar.style.width = '0%';
+        }
+
+        function clearCanvas(canvasId) {
+            const canvas = document.getElementById(canvasId);
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+
+        function drawImageContain(ctx, image, canvasWidth, canvasHeight) {
+            const scale = Math.min(canvasWidth / image.width, canvasHeight / image.height);
+            const drawWidth = image.width * scale;
+            const drawHeight = image.height * scale;
+            const offsetX = (canvasWidth - drawWidth) / 2;
+            const offsetY = (canvasHeight - drawHeight) / 2;
+
+            ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+            ctx.drawImage(image, offsetX, offsetY, drawWidth, drawHeight);
+        }
+
+        function loadImageFile(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+
+                reader.onerror = () => reject(new Error('Unable to read the selected file.'));
+                reader.onload = (event) => {
+                    const image = new Image();
+                    image.onerror = () => reject(new Error('Unable to load the selected image.'));
+                    image.onload = () => resolve(image);
+                    image.src = event.target.result;
+                };
+
+                reader.readAsDataURL(file);
+            });
+        }
+
+        async function previewFile(file, canvasId) {
+            const image = await loadImageFile(file);
+            const canvas = document.getElementById(canvasId);
+            const ctx = canvas.getContext('2d');
+
+            canvas.width = 300;
+            canvas.height = 200;
+            drawImageContain(ctx, image, canvas.width, canvas.height);
+        }
+
+        function setFile(mode, file) {
+            selectedFiles[mode] = file || null;
+            const canvasId = mode === 'encode' ? 'encode-preview' : 'decode-preview';
+
+            if (!file) {
+                clearCanvas(canvasId);
+                return;
+            }
+
+            previewFile(file, canvasId).catch(() => {
+                clearCanvas(canvasId);
+                alert('Unable to preview the selected image.');
+            });
+        }
+
+        function getFile(mode) {
+            return selectedFiles[mode];
+        }
+
+        function handleDragOver(event) {
+            event.preventDefault();
+            event.currentTarget.classList.add('drag-over');
+        }
+
+        function handleDragLeave(event) {
+            event.currentTarget.classList.remove('drag-over');
+        }
+
+        function handleDrop(event, mode) {
+            event.preventDefault();
+            event.currentTarget.classList.remove('drag-over');
+
+            const file = event.dataTransfer.files[0];
+            if (!file || !file.type.startsWith('image/')) {
+                alert('Please drop a valid image file.');
+                return;
+            }
+
+            setFile(mode, file);
+        }
+
+        function stringToBinary(value) {
+            return value
+                .split('')
+                .map((char) => char.charCodeAt(0).toString(2).padStart(8, '0'))
+                .join('');
+        }
+
+        function binaryToString(binaryValue) {
+            const bytes = binaryValue.match(/.{1,8}/g) || [];
+            return bytes
+                .map((byte) => String.fromCharCode(parseInt(byte, 2)))
+                .join('');
+        }
+
+        function bytesToBase64(bytes) {
+            let binary = '';
+            bytes.forEach((byte) => {
+                binary += String.fromCharCode(byte);
+            });
+            return btoa(binary);
+        }
+
+        function base64ToBytes(base64Value) {
+            const binary = atob(base64Value);
+            return Uint8Array.from(binary, (char) => char.charCodeAt(0));
+        }
+
+        async function deriveKey(password, salt) {
+            const passwordKey = await window.crypto.subtle.importKey(
+                'raw',
+                textEncoder.encode(password),
+                'PBKDF2',
+                false,
+                ['deriveKey']
+            );
+
+            return window.crypto.subtle.deriveKey(
+                {
+                    name: 'PBKDF2',
+                    salt,
+                    iterations: 250000,
+                    hash: 'SHA-256'
+                },
+                passwordKey,
+                {
+                    name: 'AES-GCM',
+                    length: 256
+                },
+                false,
+                ['encrypt', 'decrypt']
+            );
+        }
+
+        async function encryptMessage(message, password) {
+            const salt = window.crypto.getRandomValues(new Uint8Array(16));
+            const iv = window.crypto.getRandomValues(new Uint8Array(12));
+            const key = await deriveKey(password, salt);
+            const encryptedBuffer = await window.crypto.subtle.encrypt(
+                {
+                    name: 'AES-GCM',
+                    iv
+                },
+                key,
+                textEncoder.encode(message)
+            );
+
+            return JSON.stringify({
+                v: 1,
+                s: bytesToBase64(salt),
+                i: bytesToBase64(iv),
+                d: bytesToBase64(new Uint8Array(encryptedBuffer))
+            });
+        }
+
+        async function decryptMessage(payloadText, password) {
+            let payload;
+            try {
+                payload = JSON.parse(payloadText);
+            } catch (error) {
+                throw new Error('No supported hidden message was found in this image.');
+            }
+
+            if (payload.v !== 1 || !payload.s || !payload.i || !payload.d) {
+                throw new Error('The hidden data format is not supported.');
+            }
+
+            const salt = base64ToBytes(payload.s);
+            const iv = base64ToBytes(payload.i);
+            const encryptedBytes = base64ToBytes(payload.d);
+            const key = await deriveKey(password, salt);
+            const decryptedBuffer = await window.crypto.subtle.decrypt(
+                {
+                    name: 'AES-GCM',
+                    iv
+                },
+                key,
+                encryptedBytes
+            );
+
+            return textDecoder.decode(decryptedBuffer);
+        }
+
+        function canvasToBlob(canvas) {
+            return new Promise((resolve, reject) => {
+                canvas.toBlob((blob) => {
+                    if (!blob) {
+                        reject(new Error('Unable to generate the encoded image.'));
+                        return;
+                    }
+                    resolve(blob);
+                }, 'image/png');
+            });
+        }
+
+        function downloadBlob(blob, fileName) {
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+
+            link.href = url;
+            link.download = fileName;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        }
+
+        async function encodeImage() {
+            if (!cryptoSupported) {
+                alert('This browser does not support the Web Crypto API required by this app.');
+                return;
+            }
+
+            const file = getFile('encode');
+            const message = elements.encodeText.value;
+            const key = elements.encodeKey.value;
+
+            if (!file || !message.trim() || !key) {
+                alert('Please select an image, enter a message, and provide an encryption key.');
+                return;
+            }
+
+            resetProgress('encode');
+
+            try {
+                setProgress('encode', 10);
+                const payload = await encryptMessage(message, key);
+                const binaryMessage = stringToBinary(payload) + TERMINATOR;
+                setProgress('encode', 35);
+
+                const image = await loadImageFile(file);
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                canvas.width = image.width;
+                canvas.height = image.height;
+                ctx.drawImage(image, 0, 0);
+                setProgress('encode', 60);
+
+                const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                const data = imgData.data;
+                const maxEmbeddableBits = data.length / 4;
+                const requiredBits = binaryMessage.length;
+
+                if (requiredBits > maxEmbeddableBits) {
+                    alert(
+                        'The message is too long for the selected image.\n\n' +
+                        `Maximum payload size: ${Math.floor(maxEmbeddableBits / 8)} bytes\n` +
+                        `Required payload size: ${Math.ceil(requiredBits / 8)} bytes\n\n` +
+                        'Please use a shorter message or a larger image.'
+                    );
+                    return;
+                }
+
+                for (let i = 0; i < binaryMessage.length; i += 1) {
+                    data[i * 4] = (data[i * 4] & 254) | Number(binaryMessage[i]);
+                }
+
+                ctx.putImageData(imgData, 0, 0);
+                setProgress('encode', 85);
+
+                const blob = await canvasToBlob(canvas);
+                downloadBlob(blob, 'encoded-image.png');
+                setProgress('encode', 100);
+            } catch (error) {
+                resetProgress('encode');
+                alert(error.message || 'Encoding failed.');
+            }
+        }
+
+        async function decodeImage() {
+            if (!cryptoSupported) {
+                alert('This browser does not support the Web Crypto API required by this app.');
+                return;
+            }
+
+            const file = getFile('decode');
+            const key = elements.decodeKey.value;
+            elements.decodeText.value = '';
+
+            if (!file) {
+                alert('Please select an image.');
+                return;
+            }
+
+            if (!key) {
+                alert('Please enter a decryption key.');
+                return;
+            }
+
+            resetProgress('decode');
+
+            try {
+                setProgress('decode', 10);
+                const image = await loadImageFile(file);
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                canvas.width = image.width;
+                canvas.height = image.height;
+                ctx.drawImage(image, 0, 0);
+                setProgress('decode', 50);
+
+                const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                const data = imgData.data;
+                let binaryMessage = '';
+                let terminatorFound = false;
+
+                for (let i = 0; i < data.length; i += 4) {
+                    binaryMessage += (data[i] & 1).toString();
+                    if (binaryMessage.slice(-8) === TERMINATOR) {
+                        binaryMessage = binaryMessage.slice(0, -8);
+                        terminatorFound = true;
+                        break;
+                    }
+                }
+
+                if (!terminatorFound || !binaryMessage) {
+                    throw new Error('No hidden message was found in this image.');
+                }
+
+                setProgress('decode', 75);
+                const payload = binaryToString(binaryMessage);
+                const message = await decryptMessage(payload, key);
+
+                elements.decodeText.value = message;
+                setProgress('decode', 100);
+            } catch (error) {
+                resetProgress('decode');
+                alert(error.message || 'Decoding failed.');
+            }
+        }
+
+        elements.howItWorksBtn.addEventListener('click', toggleDefinition);
+        elements.getStartedBtn.addEventListener('click', () => {
+            elements.welcomeScreen.classList.add('hidden');
+            elements.mainContent.classList.remove('hidden');
+            showModeSelection();
+        });
+        elements.encodeBtn.addEventListener('click', () => openModal(elements.encodeModal));
+        elements.decodeBtn.addEventListener('click', () => openModal(elements.decodeModal));
+        elements.closeEncodeModalBtn.addEventListener('click', () => closeModal(elements.encodeModal));
+        elements.closeDecodeModalBtn.addEventListener('click', () => closeModal(elements.decodeModal));
+        elements.encodeNextBtn.addEventListener('click', () => enterMode('encode'));
+        elements.decodeNextBtn.addEventListener('click', () => enterMode('decode'));
+        elements.backBtn.addEventListener('click', showModeSelection);
+        elements.encodeImageInput.addEventListener('change', (event) => setFile('encode', event.target.files[0]));
+        elements.decodeImageInput.addEventListener('change', (event) => setFile('decode', event.target.files[0]));
+        elements.encodeDropZone.addEventListener('dragover', handleDragOver);
+        elements.encodeDropZone.addEventListener('dragleave', handleDragLeave);
+        elements.encodeDropZone.addEventListener('drop', (event) => handleDrop(event, 'encode'));
+        elements.decodeDropZone.addEventListener('dragover', handleDragOver);
+        elements.decodeDropZone.addEventListener('dragleave', handleDragLeave);
+        elements.decodeDropZone.addEventListener('drop', (event) => handleDrop(event, 'decode'));
+        elements.encodeImageBtn.addEventListener('click', encodeImage);
+        elements.decodeImageBtn.addEventListener('click', decodeImage);
+
+        window.addEventListener('click', (event) => {
+            if (event.target === elements.encodeModal) {
+                closeModal(elements.encodeModal);
+            }
+            if (event.target === elements.decodeModal) {
+                closeModal(elements.decodeModal);
+            }
+        });
+
+        resetProgress('encode');
+        resetProgress('decode');
+    </script>  
+</body>
+</html>
